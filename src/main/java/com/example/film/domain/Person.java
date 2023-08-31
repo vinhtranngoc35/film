@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -26,13 +27,13 @@ public class Person {
     private EGender gender;
 
     @OneToMany(mappedBy = "director")
-    private Set<Film> films;
+    private List<Film> films;
 
     @OneToMany(mappedBy = "actor")
-    private Set<FilmActor> filmActors;
+    private List<FilmActor> filmActors;
 
     @OneToMany(mappedBy = "person")
-    private Set<PersonRole> personRoles;
+    private List<PersonRole> personRoles;
 
     public Person(Long id) {
         this.id = id;

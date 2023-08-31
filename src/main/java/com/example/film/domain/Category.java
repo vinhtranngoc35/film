@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
 import java.util.Set;
 
 @Data
@@ -18,7 +19,7 @@ public class Category {
     private Long id;
     private String name;
     @OneToMany(mappedBy = "category")
-    private Set<FilmCategory> filmCategories;
+    private List<FilmCategory> filmCategories;
 
     public Category(Long id) {
         this.id = id;

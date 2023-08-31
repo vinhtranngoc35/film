@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -18,5 +19,5 @@ public class Role {
     private String name;
 
     @OneToMany(mappedBy = "role")
-    private Set<PersonRole> personRoles;
+    private List<PersonRole> personRoles;
 }

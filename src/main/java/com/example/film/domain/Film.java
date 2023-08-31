@@ -4,7 +4,7 @@ import jakarta.persistence.*;
 import lombok.Data;
 
 import java.time.LocalDate;
-import java.util.Set;
+import java.util.List;
 
 @Entity
 @Data
@@ -22,8 +22,9 @@ public class Film {
     @JoinColumn(name = "director_id")
     private Person director;
 
-    @OneToMany(mappedBy = "film")
-    private Set<FilmActor> filmActors;
-    @OneToMany(mappedBy = "film")
-    private Set<FilmCategory> filmCategories;
+    @OneToMany(mappedBy = "film", fetch = FetchType.LAZY)
+    private List<FilmActor> filmActors;
+
+    @OneToMany(mappedBy = "film", fetch = FetchType.LAZY)
+    private List<FilmCategory> filmCategories;
 }

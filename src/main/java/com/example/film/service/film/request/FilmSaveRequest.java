@@ -1,5 +1,6 @@
 package com.example.film.service.film.request;
 
+import com.example.film.service.request.SelectOptionRequest;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;

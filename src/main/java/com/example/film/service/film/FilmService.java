@@ -5,11 +5,16 @@ import com.example.film.repository.FilmActorRepository;
 import com.example.film.repository.FilmCategoryRepository;
 import com.example.film.repository.FilmRepository;
 import com.example.film.service.film.request.FilmSaveRequest;
+import com.example.film.service.film.response.FilmListResponse;
 import com.example.film.util.AppUtil;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
@@ -19,7 +24,15 @@ public class FilmService {
     private final FilmCategoryRepository filmCategoryRepository;
     private final FilmActorRepository filmActorRepository;
 
-    public void create(FilmSaveRequest request){
+    public Long create(FilmSaveRequest request){
+        //cơm
+//        Film film = new Film();
+//        film.setName(request.getName());
+//        DateTimeFormatter format = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+//        film.setPublishDate(LocalDate.parse(request.getPublishDate(), format));
+//        Person director = new Person(Long.valueOf(request.getDirector().getId()));
+//        film.setDirector(director);
+        //lib
         var film = AppUtil.mapper.map(request, Film.class);
         film = filmRepository.save(film);
         var filmCategories = new ArrayList<FilmCategory>();
@@ -37,5 +50,20 @@ public class FilmService {
             filmActors.add(new FilmActor(actor,film));
         }
         filmActorRepository.saveAll(filmActors);
+        return film.getId();
+    }
+
+    public List<FilmListResponse> getAll(){
+        return filmRepository.findAll().stream().map(film -> FilmListResponse.builder()
+                .id(film.getId())
+                .name(film.getName())
+                .director(film.getDirector().getName())
+                .publishDate(film.getPublishDate())
+                .actors(film.getFilmActors()
+                        .stream().map(filmActor -> filmActor.getActor().getName())
+                        .collect(Collectors.joining(", ")))
+                .categories(film.getFilmCategories()
+                        .stream().map(filmCategory -> filmCategory.getCategory().getName())
+                        .collect(Collectors.joining(", "))).build()).collect(Collectors.toList());
     }
 }
