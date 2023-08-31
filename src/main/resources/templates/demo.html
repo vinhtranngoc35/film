@@ -10,6 +10,20 @@
     <button type="button" class="btn btn-primary mt-4" data-bs-toggle="modal" data-bs-target="#staticBackdrop">
         Create Film
     </button>
+    <div class="row justify-content-end">
+        <div class="col-md-6">
+            <form onsubmit="onSearch(event)">
+                <div class="input-group">
+                    <input type="search" class="form-control" id="search" name="q" placeholder="Tìm kiếm">
+                    <div class="input-group-append">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fa-brands fa-searchengin"></i>
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
     <!-- Modal -->
     <div class="modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
          aria-labelledby="staticBackdropLabel" aria-hidden="true">
@@ -75,200 +89,23 @@
             <th>Director</th>
             <th>Actors</th>
             <th>Categories</th>
-            <th>Publish Date</th>
+            <th id="header-publish-date">Publish Date</th>
             <th>Action</th>
         </tr>
         <tbody id="tBody">
 
         </tbody>
-        <!--        <tr th:each="film, iter : ${films}">-->
-        <!--            <td th:text="${iter.index}"></td>-->
-        <!--            <td th:text="${film.name}"></td>-->
-        <!--            <td th:text="${film.director}"></td>-->
-        <!--            <td th:text="${film.actors}"></td>-->
-        <!--            <td th:text="${film.categories}"></td>-->
-        <!--            <td th:text="${film.publishDate}"></td>-->
-        <!--        </tr>-->
     </table>
+    <div class="d-flex justify-content-end">
+        <nav aria-label="...">
+            <ul class="pagination" id="pagination">
+
+            </ul>
+        </nav>
+    </div>
+
 </div>
 <th:block th:insert="layout.html::myScript"></th:block>
-<script>
-    const tBody = document.getElementById('tBody');
-    $(document).ready(function () {
-        $('.js-example-basic-single').select2({
-            dropdownParent: $('#staticBackdrop')
-        });
-        $('.js-example-basic-multiple').select2({
-            dropdownParent: $('#staticBackdrop')
-        })
-    });
-
-    async function createFilm() {
-        const categories = $("#categories").select2('data').map(e => e.id);
-        const actors = $('#actors').select2('data').map(e => e.id);
-        const form = document.getElementById('filmForm');
-        const formData = new FormData(form);
-        let data = Object.fromEntries(formData.entries());
-        console.log(data);
-
-        data = {
-            ...data,
-            director: {id: data.director},
-            categories,
-            actors
-        }
-
-        const filmData = {
-            name: $("#name")[0].value,
-            publishDate: $("#publishDate")[0].value,
-            director: {
-                id: $('#director').select2('data')[0].id
-            },
-            categories: categories,
-            actors: actors,
-        };
-        const res = await fetch('/api/films', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(filmData)
-        })
-        if (res.ok) {
-            toastr.success("Created")
-        }
-        const result = await res.json();
-        document.getElementById("filmId").innerText = result;
-        console.log(result)
-        $('#staticBackdrop').modal('hide');
-        //AJAX
-        // $.ajax({
-        //     url: '/api/films',
-        //     method: 'POST',
-        //     contentType: 'application/json',
-        //     data: JSON.stringify(filmData),
-        //     success: function(result) {
-        //         toastr.success("Created");
-        //         console.log(result);
-        //         $('#staticBackdrop').modal('hide');
-        //     },
-        //     error: function(xhr, status, error) {
-        //         toastr.error("Failed to create");
-        //         console.error("Error:", error);
-        //     },
-        //     done: () => {
-        //
-        //     }
-        // });
-        //AXIOS
-        // try {
-        //     const response = await axios.post('/api/films', filmData, {
-        //         headers: {
-        //             'Content-Type': 'application/json'
-        //         }
-        //     });
-        //
-        //     if (response.status === 201) {
-        //         toastr.success("Created");
-        //     }
-        //     console.log(response.data);
-        //     $('#staticBackdrop').modal('hide');
-        // } catch (error) {
-        //     toastr.error("Failed to create");
-        //     console.error("Error:", error);
-        // }
-        //AJAX XML
-        // const xhr = new XMLHttpRequest();
-        // xhr.open('POST', '/api/films', true);
-        // xhr.setRequestHeader('Content-Type', 'application/json');
-        //
-        // xhr.onreadystatechange = function () {
-        //     if (xhr.readyState === XMLHttpRequest.DONE) {
-        //         if (xhr.status === 201) {
-        //             toastr.success("Created");
-        //         } else {
-        //             toastr.error("Failed to create");
-        //             console.error("Error:", xhr.statusText);
-        //         }
-        //         console.log(xhr.responseText);
-        //         $('#staticBackdrop').modal('hide');
-        //     }
-        // };
-        //
-        // xhr.send(JSON.stringify(filmData));
-        // ActiveXObject
-        // const xhr = new ActiveXObject('Microsoft.XMLHTTP');
-        // xhr.open('POST', '/api/films', true);
-        // xhr.setRequestHeader('Content-Type', 'application/json');
-        //
-        // xhr.onreadystatechange = function () {
-        //     if (xhr.readyState === 4) {
-        //         if (xhr.status === 201) {
-        //             toastr.success("Created");
-        //         } else {
-        //             toastr.error("Failed to create");
-        //         }
-        //         const result = JSON.parse(xhr.responseText);
-        //         console.log(result);
-        //         document.getElementById('staticBackdrop').style.display = 'none';
-        //     }
-        // };
-        //
-        // xhr.send(JSON.stringify(filmData));
-    }
-
-    function renderItemStr(item) {
-        return `<tr>
-                    <td>
-                        ${item.id}
-                    </td>
-                    <td>
-                        ${item.name}
-                    </td>
-                    <td>
-                        ${item.director}
-                    </td>
-                    <td>
-                        ${item.actors}
-                    </td>
-                    <td>
-                        ${item.categories}
-                    </td>
-                    <td>
-                        ${item.publishDate}
-                    </td>
-                    <td>
-
-                    </td>
-                </tr>`
-    }
-
-    function renderTBody(items){
-        let str = '';
-        items.forEach(e => {
-            str += renderItemStr(e);
-        })
-        tBody.innerHTML = str;
-    }
-
-    async function getList(){
-        const response = await fetch('/api/films');
-        //response co ca status ok hay ko header {} body
-
-        const result = await response.json();
-        renderTBody(result);
-        //result tra ve data type map voi ben RestController
-    }
-    window.onload = () => {
-        getList();
-    }
-
-
-</script>
-<script th:inline="javascript">
-    // const films = [[${films}]];
-    // const categories = [[${categories}]];
-    // const persons = [[${persons}]];
-</script>
+<script src="/assets/film/film.js"></script>
 </body>
 </html>

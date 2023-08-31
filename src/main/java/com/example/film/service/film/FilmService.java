@@ -8,6 +8,8 @@ import com.example.film.service.film.request.FilmSaveRequest;
 import com.example.film.service.film.response.FilmListResponse;
 import com.example.film.util.AppUtil;
 import lombok.AllArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -24,7 +26,7 @@ public class FilmService {
     private final FilmCategoryRepository filmCategoryRepository;
     private final FilmActorRepository filmActorRepository;
 
-    public Long create(FilmSaveRequest request){
+    public Long create(FilmSaveRequest request) {
         //cơm
 //        Film film = new Film();
 //        film.setName(request.getName());
@@ -37,33 +39,36 @@ public class FilmService {
         film = filmRepository.save(film);
         var filmCategories = new ArrayList<FilmCategory>();
 
-        for (String idCategory: request.getCategories()) {
+        for (String idCategory : request.getCategories()) {
             Category category = new Category(Long.valueOf(idCategory));
-            filmCategories.add(new FilmCategory(film,category));
+            filmCategories.add(new FilmCategory(film, category));
         }
         filmCategoryRepository.saveAll(filmCategories);
 
         var filmActors = new ArrayList<FilmActor>();
 
-        for (String idActor: request.getActors()) {
+        for (String idActor : request.getActors()) {
             Person actor = new Person(Long.valueOf(idActor));
-            filmActors.add(new FilmActor(actor,film));
+            filmActors.add(new FilmActor(actor, film));
         }
         filmActorRepository.saveAll(filmActors);
         return film.getId();
     }
 
-    public List<FilmListResponse> getAll(){
-        return filmRepository.findAll().stream().map(film -> FilmListResponse.builder()
+    public Page<FilmListResponse> getAll(Pageable pageable, String search) {
+        search = "%"+search+"%";
+        return filmRepository.searchEverythingIgnorePublishDate(search, pageable).map(film -> FilmListResponse.builder()
                 .id(film.getId())
                 .name(film.getName())
                 .director(film.getDirector().getName())
                 .publishDate(film.getPublishDate())
                 .actors(film.getFilmActors()
-                        .stream().map(filmActor -> filmActor.getActor().getName())
+                        .stream()
+                        .map(filmActor -> filmActor.getActor().getName())
                         .collect(Collectors.joining(", ")))
                 .categories(film.getFilmCategories()
-                        .stream().map(filmCategory -> filmCategory.getCategory().getName())
-                        .collect(Collectors.joining(", "))).build()).collect(Collectors.toList());
+                        .stream()
+                        .map(filmCategory -> filmCategory.getCategory().getName())
+                        .collect(Collectors.joining(", "))).build());
     }
 }
