@@ -137,9 +137,15 @@ const inputs = [
     }
 ];
 
-function getDataFromForm(event, form) {
+function getDataFromForm(form) {
     // event.preventDefault()
     const data = new FormData(form);
     return Object.fromEntries(data.entries())
+}
+
+function onChangeSelect2(selector, value){
+    const element = $(selector);
+    element.val(value);
+    element.change();
 }
 

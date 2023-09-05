@@ -10,11 +10,16 @@ public interface FilmRepository extends JpaRepository<Film, Long> {
 
     //Page<Film> findFilmByDirector_NameOrName(String director_name, String name, Pageable pageable);
     @Query(value = "SELECT f FROM Film f " +
-            "LEFT JOIN f.filmActors a ON f.id = a.film.id " +
-            "LEFT JOIN f.filmCategories c ON f.id = c.film.id" +
-            " where f.name like :search or " +
-            "f.director.name like :search or " +
-            "a.actor.name like :search or " +
-            "c.category.name like :search GROUP BY f")
+            " where f.name LIKE :search OR  f.director.name LIKE :search " +
+            " OR EXISTS ( " +
+            "  SELECT 1 FROM FilmActor a " +
+            "  WHERE a.film = f " +
+            "  AND a.actor.name LIKE :search " +
+            ") " +
+            " OR EXISTS ( " +
+            "  SELECT 1 FROM FilmCategory c " +
+            "  WHERE c.film = f " +
+            "  AND c.category.name LIKE :search )"
+    )
     Page<Film> searchEverythingIgnorePublishDate(String search, Pageable pageable);
 }

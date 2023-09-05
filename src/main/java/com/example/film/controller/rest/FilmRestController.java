@@ -2,6 +2,7 @@ package com.example.film.controller.rest;
 
 import com.example.film.service.film.FilmService;
 import com.example.film.service.film.request.FilmSaveRequest;
+import com.example.film.service.film.response.FilmDetailResponse;
 import com.example.film.service.film.response.FilmListResponse;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
@@ -32,6 +33,17 @@ public class FilmRestController {
     public ResponseEntity<Page<FilmListResponse>> list(@PageableDefault(size = 2) Pageable pageable,
                                                        @RequestParam(defaultValue = "") String search) {
         return new ResponseEntity<>(filmService.getAll(pageable, search), HttpStatus.OK);
+    }
+
+    @GetMapping("{id}")
+    public ResponseEntity<FilmDetailResponse> findById(@PathVariable Long id){
+        return new ResponseEntity<>(filmService.findById(id), HttpStatus.OK);
+    }
+
+    @PutMapping("{id}")
+    public ResponseEntity<Void> update(@RequestBody @Valid FilmSaveRequest request, @PathVariable Long id){
+        filmService.update(request,id);
+        return ResponseEntity.noContent().build();
     }
 
 }

@@ -7,21 +7,19 @@
 <body>
 <div class="container">
     <!-- Button trigger modal -->
-    <button type="button" class="btn btn-primary mt-4" data-bs-toggle="modal" data-bs-target="#staticBackdrop">
+    <button type="button" class="btn btn-primary mt-4" data-bs-toggle="modal" data-bs-target="#staticBackdrop" id="create">
         Create Film
     </button>
     <div class="row justify-content-end">
         <div class="col-md-6">
-            <form onsubmit="onSearch(event)">
                 <div class="input-group">
                     <input type="search" class="form-control" id="search" name="q" placeholder="Tìm kiếm">
-                    <div class="input-group-append">
-                        <button type="submit" class="btn btn-primary">
-                            <i class="fa-brands fa-searchengin"></i>
-                        </button>
-                    </div>
+<!--                    <div class="input-group-append">-->
+<!--                        <button type="submit" class="btn">-->
+<!--                            <i class="fa-brands fa-searchengin"></i>-->
+<!--                        </button>-->
+<!--                    </div>-->
                 </div>
-            </form>
         </div>
     </div>
     <!-- Modal -->
@@ -74,7 +72,7 @@
                         </div>
                         <div class="modal-footer">
                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                            <button type="button" onclick="createFilm()" class="btn btn-primary">Create</button>
+                            <button type="submit" class="btn btn-primary">Save changes</button>
                         </div>
                     </form>
                 </div>

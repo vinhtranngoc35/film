@@ -2,6 +2,9 @@ const tBody = document.getElementById('tBody');
 const ePagination = document.getElementById('pagination')
 const eHeaderPublishDate = document.getElementById('header-publish-date')
 const eSearch = document.getElementById('search')
+const form = document.getElementById('filmForm');
+
+let filmSelected = {};
 let pageable = {
     page: 1,
     sort: 'id,desc',
@@ -16,36 +19,7 @@ $(document).ready(function () {
     })
 });
 
-async function createFilm() {
-    const categories = $("#categories").select2('data').map(e => e.id);
-    const actors = $('#actors').select2('data').map(e => e.id);
-    const form = document.getElementById('filmForm');
-    const formData = new FormData(form);
-    let data = Object.fromEntries(formData.entries());
 
-    data = {
-        ...data,
-        director: {id: data.director},
-        categories,
-        actors
-    }
-
-    const res = await fetch('/api/films', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(data)
-    })
-    if (res.ok) {
-        toastr.success("Created")
-    }
-    const result = await res.json();
-    document.getElementById("filmId").innerText = result;
-    console.log(result)
-    $('#staticBackdrop').modal('hide');
-
-}
 
 function renderItemStr(item) {
     return `<tr>
@@ -68,7 +42,8 @@ function renderItemStr(item) {
                         ${item.publishDate}
                     </td>
                     <td>
-
+                        <a class="btn edit" data-id="${item.id}"><i class="fa-regular fa-pen-to-square text-primary"></i></a>
+                        <a class="btn delete" data-id="${item.id}"><i class="fa-regular fa-trash-can text-danger"></i></a>
                     </td>
                 </tr>`
 }
@@ -94,11 +69,12 @@ async function getList() {
     };
     genderPagination();
     renderTBody(result.content);
+    addEventEditAndDelete();
     //result tra ve data type map voi ben RestController
 }
 
-window.onload = () => {
-    getList();
+window.onload = async () => {
+    await getList();
     onLoadSort();
 }
 
@@ -166,5 +142,108 @@ const onLoadSort = () => {
 const onSearch = (e) => {
     e.preventDefault()
     pageable.search = eSearch.value;
+    pageable.page = 1;
     getList();
 }
+const findById = async (id) => {
+    const response = await fetch('/api/films/' + id);
+    return await response.json();
+}
+const onShowEdit = async (id) => {
+    filmSelected = await findById(id);
+    $('#staticBackdropLabel').text('Edit Film');
+    $('#staticBackdrop').modal('show');
+    $('#name').val(filmSelected.name);
+    $('#publishDate').val(filmSelected.publishDate);
+    onChangeSelect2('#director', filmSelected.directorId);
+    onChangeSelect2('#actors', filmSelected.actorsId);
+    onChangeSelect2('#categories', filmSelected.categoriesId);
+}
+
+const addEventEditAndDelete = () => {
+    const eEdits = tBody.querySelectorAll('.edit');
+    const eDeletes = tBody.querySelectorAll('.delete');
+    for (let i = 0; i < eEdits.length; i++) {
+        console.log(eEdits[i].id)
+        eEdits[i].addEventListener('click', () => {
+            onShowEdit(eEdits[i].dataset.id);
+        })
+    }
+}
+const clearForm = () => {
+    onChangeSelect2('#director', null);
+    onChangeSelect2('#categories', null);
+    onChangeSelect2('#actors', null);
+}
+const onShowCreate = () => {
+    form.reset();
+    filmSelected = {};
+    clearForm();
+    $('#staticBackdropLabel').text('Create Film');
+}
+
+document.getElementById('create').onclick = () => {
+    onShowCreate();
+}
+async function createFilm() {
+    const data = getData();
+
+    return  await fetch('/api/films', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(data)
+    })
+}
+const editFilm = async () => {
+    let data = getData();
+    return await fetch('/api/films/'+filmSelected.id, {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(data)
+    })
+
+}
+
+form.onsubmit = async (e) => {
+    e.preventDefault();
+    let message = "Created";
+    let res;
+    if(filmSelected.id){
+        res = await editFilm();
+        message = "Updated";
+    }else{
+        res =  await createFilm();
+    }
+    $('#staticBackdrop').modal('hide');
+    if(res.ok){
+        toastr.success(message);
+    }
+    getList();
+}
+
+function getData(){
+    const categories = $("#categories").select2('data').map(e => e.id);
+    const actors = $('#actors').select2('data').map(e => e.id);
+
+    let data = getDataFromForm(form);
+
+    data = {
+        ...data,
+        director: {id: data.director},
+        categories,
+        actors,
+        id: filmSelected.id
+    }
+    return data;
+}
+
+const searchInput = document.querySelector('#search');
+
+searchInput.addEventListener('search', () => {
+    onSearch(event)
+});
+
